@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Contact Us</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="destination.html">Destinations</a>
+      <a href="booking.html">Booking</a>
+      <a href="contact.html" class="active">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="contact-container">
+      <div class="contact-info">
+        <h2>Get in Touch</h2>
+        <p>📍 <strong>Address:</strong> Bangalore, Karnataka, India</p>
+        <p>📞 <strong>Phone:</strong> +91 97413 78237</p>
+        <p>✉ <strong>Email:</strong> travel@gmail.com</p>
+      </div>
+
+      <div class="contact-form">
+        <h2>Send a Message</h2>
+        <form action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="81bebc67-a1a9-42ea-9829-8328a3833160">
+
+          <label for="name">Your Name</label>
+          <input type="text" id="name" name="name" placeholder="Enter your name" required />
+
+          <label for="email">Your Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required />
+
+          <label for="message">Your Message</label>
+          <textarea id="message" name="message" placeholder="Write your message" rows="5" required></textarea>
+
+          <button type="submit">Send Message</button>
+          <p id="success-msg" style="display: none;">✅ Message sent successfully!</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Travel Explore. All rights reserved.</p>
+  </footer>
+</body>
+</html>
