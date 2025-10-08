@@ -17,7 +17,6 @@
   </header>
 
   <main>
-    <!-- Hero Section -->
     <section id="hero">
       <div class="hero-content">
         <h2>Book your next trip with ease!</h2>
@@ -25,7 +24,6 @@
       </div>
     </section>
 
-    <!-- Destinations Section -->
     <section id="destinations">
       <h2>Popular Destinations</h2>
       <div class="cards">
@@ -33,15 +31,14 @@
         <div class="card"><img src="img/tokyo.png" alt="Tokyo"><h3>Tokyo</h3><p>Modern Meets Tradition</p></div>
         <div class="card"><img src="img/bali.png" alt="Bali"><h3>Bali</h3><p>Tropical Paradise</p></div>
         <div class="card"><img src="img/maldives.png" alt="Maldives"><h3>Maldives</h3><p>Stunning Natural Beauty</p></div>
-        <div class="card"><img src="img/dubai.png" alt="Dubai"><h3>Dubai</h3><p>Modern Architecture, Luxurious Experiences</p></div>
-        <div class="card"><img src="img/new_york _city.png" alt="New York City"><h3>New York City</h3><p>Iconic Landmarks, Vibrant Culture</p></div>
-        <div class="card"><img src="img/goa.png" alt="Goa"><h3>Goa</h3><p>Stunning Beaches, Vibrant Nightlife</p></div>
+        <div class="card"><img src="img/dubai.png" alt="Dubai"><h3>Dubai</h3><p>Modern Architecture</p></div>
+        <div class="card"><img src="img/new_york _city.png" alt="New York City"><h3>New York City</h3><p>Iconic Landmarks</p></div>
+        <div class="card"><img src="img/goa.png" alt="Goa"><h3>Goa</h3><p>Stunning Beaches</p></div>
         <div class="card"><img src="img/tajmahal.png" alt="Tajmahal"><h3>Tajmahal</h3><p>Symbol of Love</p></div>
-        <div class="card"><img src="img/ooty.png" alt="Ooty"><h3>Ooty</h3><p>Scenic Beauty, Tea Plantations</p></div>
+        <div class="card"><img src="img/ooty.png" alt="Ooty"><h3>Ooty</h3><p>Scenic Beauty</p></div>
       </div>
     </section>
 
-    <!-- Booking Section -->
     <section id="book">
       <h2>Book Your Trip</h2>
       <div class="booking-card">
@@ -66,11 +63,24 @@
 
           <div class="price-section">
             <label>Price:</label>
-            <span id="price">$0</span>
+            <span id="price">₹0</span>
           </div>
 
           <input type="date" name="date" required />
-          <button type="submit">Submit Booking</button>
+
+          <div class="payment-method">
+            <label>Select Payment Method:</label>
+            <div>
+              <input type="radio" id="pay-card" name="payment_method" value="card" checked>
+              <label for="pay-card">Credit/Debit Card</label>
+            </div>
+            <div>
+              <input type="radio" id="pay-upi" name="payment_method" value="upi">
+              <label for="pay-upi">UPI</label>
+            </div>
+          </div>
+
+          <button type="button" id="pay-btn">Proceed to Pay</button>
         </form>
         <p id="confirmation" style="display: none;">✅ Booking submitted! We’ll contact you soon.</p>
       </div>
@@ -81,26 +91,80 @@
     <p>&copy; 2025 Travel Explore. All rights reserved.</p>
   </footer>
 
-  <!-- Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  
   <script>
     const prices = {
-      "Paris": 3600,
-      "Tokyo": 2800,
-      "Bali": 3000,
-      "Goa": 300,
-      "Tajmahal": 180,
-      "Ooty": 220,
-      "Maldives": 1200,
-      "Dubai": 670,
-      "New York City": 3600
+      "Paris": 300000, "Tokyo": 220000, "Bali": 250000, "Goa": 22000,
+      "Tajmahal": 15000, "Ooty": 18000, "Maldives": 100000,
+      "Dubai": 55000, "New York City": 300000
     };
 
+    const bookingForm = document.getElementById("booking-form");
     const destinationSelect = document.getElementById("destination");
     const priceDisplay = document.getElementById("price");
+    const confirmationMsg = document.getElementById("confirmation");
+    const payBtn = document.getElementById("pay-btn");
 
     destinationSelect.addEventListener("change", () => {
       const selected = destinationSelect.value;
-      priceDisplay.textContent = selected ? `$${prices[selected].toLocaleString()}` : "$0";
+      priceDisplay.textContent = selected ? `₹${prices[selected].toLocaleString()}` : "₹0";
+    });
+
+    payBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const selectedDestination = destinationSelect.value;
+        const amount = prices[selectedDestination];
+
+        if (!selectedDestination || !amount) {
+            alert("Please select a destination.");
+            return;
+        }
+
+        const formData = new FormData(bookingForm);
+        const name = formData.get("name");
+        const email = formData.get("email");
+
+        if (!name || !email) {
+            alert("Please fill in your name and email.");
+            return;
+        }
+        
+        const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        const options = {
+            key: "rzp_test_YOUR_KEY_ID", // IMPORTANT: Replace with your Razorpay Test Key ID
+            amount: amount * 100,
+            currency: "INR",
+            name: "World Wave Travel",
+            description: `Booking for ${selectedDestination}`,
+            handler: function (response) {
+                formData.append("razorpay_payment_id", response.razorpay_payment_id);
+                fetch(bookingForm.action, { method: "POST", body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        bookingForm.style.display = "none";
+                        confirmationMsg.style.display = "block";
+                    } else {
+                        alert("Payment successful, but booking submission failed. Please contact us.");
+                    }
+                })
+                .catch(error => alert("A technical error occurred. Please contact us."));
+            },
+            prefill: { name: name, email: email },
+            theme: { color: "#0083b0" },
+            method: {
+                card: selectedPaymentMethod === 'card',
+                upi: selectedPaymentMethod === 'upi',
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response){
+            alert(`Payment failed: ${response.error.description}`);
+        });
+        rzp.open();
     });
   </script>
 </body>
